@@ -5,25 +5,21 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"os/exec"
 	"strings"
 )
-
-// import "os/exec"
-// import "log"
-// import "bytes"
-// import "strings"
 
 func main() {
 	//  Subcommands
 	cloneAwsCommand := flag.NewFlagSet("clone", flag.ExitOnError)
 
+	cloneUrl := cloneAwsCommand.String("url", "", "Repositorie URL (Required)")
 	cloneUser := cloneAwsCommand.String("user", "", "Codecommit username (Required)")
-	clonePassword := cloneAwsCommand.String("password", "", "Codecommit password (Required)")
-	cloneUrl := cloneAwsCommand.String("url", "", "Repositorie URL (required)")
+	clonePass := cloneAwsCommand.String("password", "", "Codecommit password (Required)")
+	cloneProjectName := cloneAwsCommand.String("projectName", "", "Folder name to copy repo (optional)")
 
-	flag.ErrHelp.Error()
 	if len(os.Args) < 2 {
-		fmt.Errorf("list or count subcommand is required")
+		fmt.Println("list or count subcommand is required")
 		os.Exit(1)
 	}
 
@@ -34,7 +30,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if *clonePassword == "" {
+	if *clonePass == "" {
 		cloneAwsCommand.PrintDefaults()
 		os.Exit(1)
 	}
@@ -45,7 +41,7 @@ func main() {
 	}
 
 	userEncode := url.QueryEscape(*cloneUser)
-	passwordEncode := url.QueryEscape(*clonePassword)
+	passwordEncode := url.QueryEscape(*clonePass)
 
 	repoUrl := getRepoPath(*cloneUrl)
 
@@ -59,7 +55,7 @@ func main() {
 	fmt.Println(" ")
 	fmt.Println(fullUrlEncode)
 
-	// cloneRepo(fullUrlEncode)
+	cloneRepo(fullUrlEncode, *cloneProjectName)
 }
 
 func getRepoPath(url string) string {
@@ -68,17 +64,16 @@ func getRepoPath(url string) string {
 	return urlSplit[1]
 }
 
-// func cloneRepo(url string)  {
-
-// 	cmd := exec.Command("git", "clone", url)
-
-// 	// cmd.Stdin = strings.NewReader()
-// 	var out byte.Buffer
-// 	cmd.Stdout = &out
-
-// 	err := cmd.Run()
-
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// }p
+func cloneRepo(url string, projectName string) {
+	if projectName != "" {
+		if err := exec.Command("git", "clone", url, projectName).Run(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+	} else {
+		if err := exec.Command("git", "clone", url).Run(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+	}
+}
