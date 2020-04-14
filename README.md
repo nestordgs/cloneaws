@@ -33,3 +33,7 @@ go run main.go clone --profile="your-profile" --url="https://url" --projectName=
 ## Authors
 
 * **Nestor Gutiérrez**
+
+## License
+
+This project is licensed under the GNU/GPL - see the [LICENSE.md](LICENSE.md) file for details
