@@ -14,31 +14,43 @@ import (
 )
 
 type Users struct {
-	Users []User `json: "users"`
+	Users []User `json:"users"`
 }
 
 type User struct {
-	Alias    string `json: "alias"`
-	Email    string `json: "email"`
-	Password string `json: "password"`
+	Alias    string `json:"alias"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func main() {
 	//  Subcommands
 	cloneAwsCommand := flag.NewFlagSet("clone", flag.ExitOnError)
 
-	cloneUrl := cloneAwsCommand.String("url", "", "Repositorie HTTPS/SSH URL (Required)")
+	cloneUrl := cloneAwsCommand.String("url", "", "Repository HTTPS/SSH URL (Required)")
 	cloneProfile := cloneAwsCommand.String("profile", "", "Profile name to use cloning repository (Required)")
 	cloneProjectName := cloneAwsCommand.String("projectName", "", "Folder name to copy repo (optional)")
+	cloneHelp := cloneAwsCommand.Bool("help", false, "Show usage for subcommand")
 
 	if len(os.Args) < 2 {
-		cloneAwsCommand.PrintDefaults()
+		fmt.Println("  clone string")
+		fmt.Println("	Subcommand for clone")
 		log.Fatalln("Subcommand is required")
 	}
 
 	switch os.Args[1] {
 	case "clone":
 		cloneAwsCommand.Parse(os.Args[2:])
+
+		if *cloneHelp == true {
+			cloneAwsCommand.Usage()
+			os.Exit(1)
+		}
+
+		if *cloneProfile == "" && *cloneUrl == "" {
+			cloneAwsCommand.PrintDefaults()
+			log.Fatalln("No flags set for clone subcommand")
+		}
 
 		if *cloneProfile == "" {
 			cloneAwsCommand.PrintDefaults()
@@ -59,6 +71,10 @@ func main() {
 		fullUrlEncode := "https://" + userEncode + ":" + passwordEncode + "@" + urlRepo
 
 		executeCloneCommand(fullUrlEncode, *cloneProjectName)
+	default:
+		fmt.Println("  clone string")
+		fmt.Println("	Subcommand for clone")
+		log.Fatalln("Subcommand is required")
 	}
 }
 
